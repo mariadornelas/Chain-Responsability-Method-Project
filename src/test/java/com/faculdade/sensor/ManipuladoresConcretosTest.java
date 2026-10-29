@@ -6,7 +6,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/** Cada manipulador isolado (sem próximo): só trata o que está na sua competência. */
 class ManipuladoresConcretosTest {
 
     private final Ocorrencia alerta = new Ocorrencia("TEMPERATURA", 75.0, Severidade.ALERTA);
@@ -61,7 +60,7 @@ class ManipuladoresConcretosTest {
         ManipuladorOcorrencia operador = new OperadorTurno();
 
         operador.tratar(alerta);
-        operador.tratar(critica);   // fora da competência, sem próximo
+        operador.tratar(critica);
 
         assertEquals(java.util.List.of(alerta), operador.getTratadas());
     }

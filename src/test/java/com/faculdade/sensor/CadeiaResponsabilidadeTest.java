@@ -7,11 +7,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * O que caracteriza o Chain of Responsibility: o cliente só conhece o
- * primeiro elo, o pedido sobe pela cadeia até alguém tratar, e a cadeia
- * para nesse ponto.
- */
 class CadeiaResponsabilidadeTest {
 
     private final Ocorrencia alerta = new Ocorrencia("TEMPERATURA", 75.0, Severidade.ALERTA);
@@ -25,8 +20,6 @@ class CadeiaResponsabilidadeTest {
     private void montarCadeiaCompleta() {
         operador.definirProximo(supervisor).definirProximo(gerente);
     }
-
-    // ---- quem trata o quê ----
 
     @Test
     void cadaSeveridadeDeveSerTratadaPeloPrimeiroElosuficientementeCompetente() {
@@ -57,8 +50,6 @@ class CadeiaResponsabilidadeTest {
         assertSame(supervisor, devolvido);
     }
 
-    // ---- a cadeia para no primeiro que trata ----
-
     @Test
     void cadeiaDevePararNoPrimeiroQueTrataSemConsultarOsSeguintes() {
         List<String> visitas = new ArrayList<>();
@@ -67,7 +58,7 @@ class CadeiaResponsabilidadeTest {
         ManipuladorEspiao c = new ManipuladorEspiao("C", Severidade.EMERGENCIA, visitas);
         a.definirProximo(b).definirProximo(c);
 
-        a.tratar(critica);   // A não pode, B pode: C nem é consultado
+        a.tratar(critica);
 
         assertEquals(List.of("A", "B"), visitas);
     }
@@ -85,18 +76,13 @@ class CadeiaResponsabilidadeTest {
         assertEquals(List.of("A", "B", "C"), visitas);
     }
 
-    // ---- a ordem da cadeia decide ----
-
     @Test
     void ordemDaCadeiaDeveDecidirQuemTrata() {
         ManipuladorOcorrencia g = new GerenteSeguranca();
         g.definirProximo(new OperadorTurno());
 
-        // O gerente é capaz de tudo e está na frente: trata até um simples alerta.
         assertEquals("Gerente de segurança", g.tratar(alerta).orElseThrow().responsavel());
     }
-
-    // ---- ocorrência sem tratamento ----
 
     @Test
     void cadeiaSemUmElosuficienteDeveDevolverVazio() {
@@ -107,14 +93,12 @@ class CadeiaResponsabilidadeTest {
         assertTrue(supervisor.getTratadas().isEmpty());
     }
 
-    // ---- composição dinâmica ----
-
     @Test
     void cadeiaPodeSerEstendidaEmTempoDeExecucao() {
         operador.definirProximo(supervisor);
         assertTrue(operador.tratar(emergencia).isEmpty());
 
-        supervisor.definirProximo(gerente);   // agora a cadeia ganha o último elo
+        supervisor.definirProximo(gerente);
 
         assertEquals("Gerente de segurança", operador.tratar(emergencia).orElseThrow().responsavel());
     }
@@ -143,8 +127,6 @@ class CadeiaResponsabilidadeTest {
         assertEquals(2, gerente.getTratadas().size());
     }
 
-    // ---- proteção da cadeia ----
-
     @Test
     void naoDeveAceitarProximoNulo() {
         assertThrows(NullPointerException.class, () -> operador.definirProximo(null));
@@ -169,16 +151,13 @@ class CadeiaResponsabilidadeTest {
 
         assertThrows(IllegalArgumentException.class, () -> gerente.definirProximo(operador));
 
-        // a cadeia continua funcionando e termina no gerente
         assertEquals("Gerente de segurança", operador.tratar(emergencia).orElseThrow().responsavel());
     }
-
-    // ---- desacoplamento ----
 
     @Test
     void clienteDeveFuncionarConhecendoApenasOTipoAbstratoDoPrimeiroElo() {
         montarCadeiaCompleta();
-        ManipuladorOcorrencia inicio = operador;   // o cliente só enxerga isto
+        ManipuladorOcorrencia inicio = operador;
 
         for (Ocorrencia o : List.of(alerta, critica, emergencia)) {
             assertTrue(assertDoesNotThrow(() -> inicio.tratar(o)).isPresent());
@@ -187,7 +166,6 @@ class CadeiaResponsabilidadeTest {
 
     @Test
     void novoManipuladorPodeEntrarNaCadeiaSemAlterarNenhumExistente() {
-        // Um elo novo, criado só no teste, que só aceita ALERTA e age diferente.
         ManipuladorOcorrencia robo = new ManipuladorOcorrencia() {
             @Override
             protected Severidade severidadeMaxima() {

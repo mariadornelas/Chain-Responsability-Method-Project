@@ -2,11 +2,6 @@ package com.faculdade.sensor;
 
 import java.util.List;
 
-/**
- * Dublê de teste: manipulador com competência configurável que registra,
- * numa lista COMPARTILHADA, cada vez que a cadeia o consulta. Assim o teste
- * enxerga a ordem de visita de toda a cadeia. Não faz parte do padrão.
- */
 class ManipuladorEspiao extends ManipuladorOcorrencia {
 
     private final String nome;
